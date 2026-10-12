@@ -26,6 +26,10 @@ jobs:
           unzip -q GameplayFootball-web*.zip -d work
           ls work
 
+      - name: Aplicar ajustes
+        run: |
+          if [ -f fixes.sh ]; then bash fixes.sh work/GameplayFootball-web; fi
+
       - uses: mymindstorm/setup-emsdk@v14
         with:
           version: latest
