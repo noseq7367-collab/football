@@ -46,3 +46,4 @@ open(p, "w", encoding="utf-8", errors="surrogateescape", newline="").write(t)
 print("parche del contexto WebGL aplicado")
 PYEOF
 grep -n -E 'OFFSCREEN|profiling' CMakeLists.txt
+printf '"graphics3d_frametime_ms" "16"\n' > data/football.config
