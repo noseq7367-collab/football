@@ -1,0 +1,73 @@
+name: Compilar y publicar el juego web
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Descomprimir el proyecto
+        run: |
+          mkdir work
+          unzip -q GameplayFootball-web*.zip -d work
+          ls work
+
+      - uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: latest
+          actions-cache-folder: emsdk-cache
+
+      - name: Instalar Ninja
+        run: sudo apt-get update && sudo apt-get install -y ninja-build
+
+      - name: Compilar
+        working-directory: work/GameplayFootball-web
+        run: |
+          mkdir -p build_web && cd build_web
+          emcmake cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake --build . -- -k 0 2>&1 | tee ../build_log.txt
+
+      - name: Guardar el log de compilacion
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build_log
+          path: work/GameplayFootball-web/build_log.txt
+
+      - name: Armar el sitio
+        working-directory: work/GameplayFootball-web
+        run: |
+          mkdir site
+          cp build_web/gameplayfootball.* site/
+          cp webport/coi-serviceworker.js site/
+          mv site/gameplayfootball.html site/index.html
+          sed -i '0,/<head>/s//<head><script src="coi-serviceworker.js"><\/script>/' site/index.html
+          ls -la site
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: work/GameplayFootball-web/site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
