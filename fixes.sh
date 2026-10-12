@@ -86,5 +86,9 @@ t = patch(t,
 open(p, "w", encoding="utf-8", errors="surrogateescape", newline="").write(t)
 print("parches del renderer aplicados")
 PYEOF
+# --- 3) Ruta de plantillas de animacion: con std::filesystem, 'dir / "/templates"' REEMPLAZA dir
+#        (queda "/templates") y la carga del partido revienta ---
+sed -i 's|directory / "/templates"|directory / "templates"|' src/onthepitch/player/humanoid/animcollection.cpp
+grep -q 'directory / "templates"' src/onthepitch/player/humanoid/animcollection.cpp
 grep -n -E 'OFFSCREEN|profiling' CMakeLists.txt
 printf '"graphics3d_frametime_ms" "50"\n"context_x" "640"\n"context_y" "360"\n' > data/football.config
