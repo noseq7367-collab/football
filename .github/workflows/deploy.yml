@@ -37,7 +37,12 @@ jobs:
       - name: Preparar librerias de Emscripten
         run: |
           echo 'int main(){return 0;}' > t.c
-          emcc t.c -pthread -fexceptions --use-port=sdl2 --use-port=sdl2_image:formats=png,jpg --use-port=sdl2_ttf --use-port=sdl2_gfx --use-port=boost_headers --use-port=sqlite3 -o t.js
+          emcc -c t.c --use-port=sdl2 -o t1.o
+          emcc -c t.c -pthread --use-port=sdl2 -o t2.o
+          emcc -c t.c -pthread --use-port=sdl2_image:formats=png,jpg -o t3.o
+          emcc -c t.c -pthread --use-port=sdl2_ttf -o t4.o
+          emcc -c t.c -pthread --use-port=sdl2_gfx -o t5.o
+          emcc -c t.c -pthread --use-port=boost_headers --use-port=sqlite3 -o t6.o
 
       - name: Compilar
         shell: bash
@@ -46,6 +51,7 @@ jobs:
           mkdir -p build_web && cd build_web
           emcmake cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release
           cmake --build . -- -k 0 2>&1 | tee ../build_log.txt
+
       - name: Guardar el log de compilacion
         if: always()
         uses: actions/upload-artifact@v4
